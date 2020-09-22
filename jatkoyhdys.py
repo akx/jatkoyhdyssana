@@ -1,12 +1,13 @@
 import argparse
 import multiprocessing
+from typing import Dict
 
 import tqdm
 
 from collections import defaultdict
 
-words = []
-words_by_letters = None
+words: List[str] = []
+words_by_letters: Dict[str, set] = None
 
 
 def load_words():
@@ -30,9 +31,13 @@ def process_word(w1: str):
     for letter in w1:
         cand_words.update(words_by_letters[letter])
     cand_words.discard(w1)
+    cand_words_by_initial_letter = defaultdict(set)
+    for word in cand_words:
+        cand_words_by_initial_letter[word[0]].add(word)
+
     results = set()
-    for w2 in cand_words:
-        for end in ends:
+    for end in ends:
+        for w2 in cand_words_by_initial_letter[end[0]]:
             # if end not in words:
             # 	continue
             if w2.startswith(end):
