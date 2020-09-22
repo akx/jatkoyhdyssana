@@ -1,14 +1,27 @@
+import argparse
+import multiprocessing
+
 import tqdm
 
 from collections import defaultdict
 
-with open("kotus_sanat.txt", "r", encoding="utf-8") as fp:
-    words = [w.strip() for w in fp if w[0].isalpha()]
+words = []
+words_by_letters = None
 
-words_by_letters = defaultdict(set)
-for word in words:
-    for letter in word:
-        words_by_letters[letter].add(word)
+
+def load_words():
+    global words, words_by_letters
+
+    if words:  # We've already done this initialization (maybe in a parent process)
+        return
+
+    with open("kotus_sanat.txt", "r", encoding="utf-8") as fp:
+        words = [w.strip() for w in fp if w[0].isalpha()]
+
+    words_by_letters = defaultdict(set)
+    for word in words:
+        for letter in word:
+            words_by_letters[letter].add(word)
 
 
 def process_word(w1: str):
@@ -26,13 +39,35 @@ def process_word(w1: str):
                 nw = w1[: -len(end)] + w2
                 if nw not in (w1, w2):
                     results.add(nw)
-    return results
+    return (w1, results)
 
 
-def main():
+def single_process():
+    load_words()
     for w1 in tqdm.tqdm(words):
         for result in process_word(w1):
             print(result)
+
+
+def multi_process():
+    load_words()
+    multiprocessing.set_start_method("fork")
+    with multiprocessing.Pool(initializer=load_words) as p:
+        for w1, results in tqdm.tqdm(
+            p.imap_unordered(process_word, words, chunksize=25), total=len(words)
+        ):
+            for result in results:
+                print(result)
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--mode", "-m", choices=("single", "multi"), required=True)
+    args = ap.parse_args()
+    if args.mode == "single":
+        single_process()
+    else:
+        multi_process()
 
 
 if __name__ == "__main__":
