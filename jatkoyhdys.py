@@ -45,7 +45,7 @@ def find_results(w1, cand_words_by_initial_letter, ends):
             # 	continue
             if w2.startswith(end):
                 nw = w1[: -len(end)] + w2
-                if nw != w1 and nw != w2:
+                if nw != w1:
                     results.append(nw)
     return results
 
