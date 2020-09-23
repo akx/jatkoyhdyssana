@@ -1,10 +1,14 @@
 import argparse
 import multiprocessing
+import os
+import sys
 from typing import Dict, List
 
 import tqdm
 
 from collections import defaultdict
+
+INPUT_FILE = os.environ.get("INPUT_FILE", "kotus_sanat.txt")
 
 words: List[str] = []
 words_by_letters: Dict[str, set] = None
@@ -16,7 +20,7 @@ def load_words():
     if words:  # We've already done this initialization (maybe in a parent process)
         return
 
-    with open("kotus_sanat.txt", "r", encoding="utf-8") as fp:
+    with open(INPUT_FILE, "r", encoding="utf-8") as fp:
         words = [w.strip() for w in fp if w[0].isalpha()]
 
     words_by_letters = defaultdict(set)
@@ -47,11 +51,16 @@ def process_word(w1: str):
     return (w1, results)
 
 
-def single_process():
+def single_process(output=False):
     load_words()
+    n = 0
     for w1 in tqdm.tqdm(words):
-        for result in process_word(w1):
-            print(result)
+        w1, results = process_word(w1)
+        for result in results:
+            n += 1
+            if output:
+                print(result)
+    print(f"{n} jatkoyhdyssanas found", file=sys.stderr)
 
 
 def multi_process():
@@ -67,10 +76,12 @@ def multi_process():
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--mode", "-m", choices=("single", "multi"), required=True)
+    ap.add_argument("--mode", "-m", choices=("single", "multi", "bench"), required=True)
     args = ap.parse_args()
-    if args.mode == "single":
-        single_process()
+    if args.mode == "bench":
+        single_process(output=False)
+    elif args.mode == "single":
+        single_process(output=True)
     else:
         multi_process()
 
