@@ -1,17 +1,17 @@
 import argparse
-import multiprocessing
 import os
 import sys
+import time
+from collections import defaultdict
 from typing import Dict, List
 
 import tqdm
-
-from collections import defaultdict
 
 INPUT_FILE = os.environ.get("INPUT_FILE", "kotus_sanat.txt")
 
 words: List[str] = []
 words_by_letters: Dict[str, set] = None
+all_letters = set()
 
 
 def load_words():
@@ -27,43 +27,57 @@ def load_words():
     for word in words:
         for letter in word:
             words_by_letters[letter].add(word)
+            all_letters.update(set(word))
 
 
 def process_word(w1: str):
     ends = [w1[-n:] for n in range(3, min(len(w1), 15))]
-    cand_words = set()
-    for letter in w1:
-        cand_words.update(words_by_letters[letter])
-    cand_words.discard(w1)
-    cand_words_by_initial_letter = defaultdict(set)
-    for word in cand_words:
-        cand_words_by_initial_letter[word[0]].add(word)
+    cand_words_by_initial_letter = get_cand_words_by_initial(w1)
+    results = find_results(w1, cand_words_by_initial_letter, ends)
+    return (w1, set(results))
 
-    results = set()
+
+def find_results(w1, cand_words_by_initial_letter, ends):
+    results = []
     for end in ends:
         for w2 in cand_words_by_initial_letter[end[0]]:
             # if end not in words:
             # 	continue
             if w2.startswith(end):
                 nw = w1[: -len(end)] + w2
-                if nw not in (w1, w2):
-                    results.add(nw)
-    return (w1, results)
+                if nw != w1 and nw != w2:
+                    results.append(nw)
+    return results
+
+
+def get_cand_words_by_initial(w1):
+    cand_words = set()
+    for letter in set(w1):
+        cand_words.update(words_by_letters[letter])
+    cand_words.discard(w1)
+    cand_words_by_initial_letter = {letter: set() for letter in all_letters}
+    for word in cand_words:
+        cand_words_by_initial_letter[word[0]].add(word)
+    return cand_words_by_initial_letter
 
 
 def single_process(output=False):
     load_words()
     n = 0
+    t0 = time.clock_gettime(time.CLOCK_MONOTONIC)
     for w1 in tqdm.tqdm(words):
         w1, results = process_word(w1)
         for result in results:
             n += 1
             if output:
                 print(result)
-    print(f"{n} jatkoyhdyssanas found", file=sys.stderr)
+    t1 = time.clock_gettime(time.CLOCK_MONOTONIC)
+    print(f"{n} jatkoyhdyssanas found in {t1 - t0}", file=sys.stderr)
 
 
 def multi_process():
+    import multiprocessing
+
     load_words()
     multiprocessing.set_start_method("fork")
     with multiprocessing.Pool(initializer=load_words) as p:
