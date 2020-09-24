@@ -1,4 +1,4 @@
-use encoding::all::ISO_8859_1;
+use encoding::all::ISO_8859_15;
 use encoding::{DecoderTrap, EncoderTrap, Encoding};
 use indicatif::{ProgressBar, ProgressIterator, ProgressStyle};
 use std::cmp::min;
@@ -27,7 +27,7 @@ fn read_words() -> io::Result<HashSet<Vec<u8>>> {
             if ip.contains(' ') {
                 continue;
             }
-            if let Ok(enc) = ISO_8859_1.encode(&ip, EncoderTrap::Strict) {
+            if let Ok(enc) = ISO_8859_15.encode(&ip, EncoderTrap::Strict) {
                 words.insert(enc);
             }
         }
@@ -56,7 +56,7 @@ fn run() -> io::Result<()> {
                     let start_slice = &w1[..w1.len() - end.len()];
                     let nw = [start_slice, w2].concat();
                     if &nw != w1 {
-                        if let Ok(decode) = ISO_8859_1.decode(&nw, DecoderTrap::Strict) {
+                        if let Ok(decode) = ISO_8859_15.decode(&nw, DecoderTrap::Strict) {
                             println!("{}", decode);
                         }
                     }
