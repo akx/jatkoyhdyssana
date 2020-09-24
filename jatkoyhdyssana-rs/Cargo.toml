@@ -9,3 +9,4 @@ edition = "2018"
 [dependencies]
 encoding = "0.2.33"
 indicatif = "0.15.0"
+array-init = "0.1.1"
