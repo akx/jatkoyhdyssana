@@ -55,9 +55,9 @@ def get_cand_words_by_initial(w1):
     for letter in set(w1):
         cand_words.update(words_by_letters[letter])
     cand_words.discard(w1)
-    cand_words_by_initial_letter = {letter: set() for letter in all_letters}
+    cand_words_by_initial_letter = {letter: [] for letter in all_letters}
     for word in cand_words:
-        cand_words_by_initial_letter[word[0]].add(word)
+        cand_words_by_initial_letter[word[0]].append(word)
     return cand_words_by_initial_letter
 
 
