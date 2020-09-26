@@ -35,7 +35,7 @@ fn read_words(filename: &str) -> io::Result<HashSet<Vec<u8>>> {
 
 const PROGRESS_DELTA_DIVISOR: usize = 100;
 
-type WordsByStartingChar<'a> = [Vec<&'a Vec<u8>>; 255];
+type WordsByStartingChar<'a> = [Vec<&'a Vec<u8>>; 256];
 
 fn get_progress_style() -> indicatif::ProgressStyle {
     ProgressStyle::default_bar()
