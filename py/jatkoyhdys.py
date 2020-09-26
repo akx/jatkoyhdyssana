@@ -7,7 +7,7 @@ from typing import Dict, List
 
 import tqdm
 
-INPUT_FILE = os.environ.get("INPUT_FILE", "kotus_sanat.txt")
+INPUT_FILE = os.environ.get("INPUT_FILE", "sanat.txt")
 
 words: List[str] = []
 words_by_letters: Dict[str, set] = None

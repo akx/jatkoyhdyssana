@@ -1,3 +1,4 @@
-/kotus_sanat.txt
 /*.txt
-/*.zst
+/misc
+data/*.txt
+data/*.zst

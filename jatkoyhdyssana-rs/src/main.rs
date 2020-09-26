@@ -44,8 +44,7 @@ fn get_progress_style() -> indicatif::ProgressStyle {
 
 fn run() -> io::Result<()> {
     let tmr = timer!("JYS");
-    let filename =
-        env::var("JATKOYHDYSSANA_DICT").unwrap_or_else(|_| "kotus_sanat.txt".to_string());
+    let filename = env::var("JATKOYHDYSSANA_DICT").unwrap_or_else(|_| "sanat.txt".to_string());
     let words = read_words(filename.as_str())?;
     let mut words_by_starting_char: WordsByStartingChar = array_init::array_init(|_| Vec::new());
     for word in &words {
